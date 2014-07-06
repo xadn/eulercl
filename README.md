@@ -1,3 +1,7 @@
+lein test-refresh
+
+(use 'eulercl.core :reload)
+
 # eulercl
 
 FIXME: description

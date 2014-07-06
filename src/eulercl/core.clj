@@ -2,9 +2,11 @@
   (:gen-class))
 
 (use '[clojure.set]
-     '[clojure.contrib.math :only (sqrt)]
+     '[clojure.contrib.math :only (sqrt expt)]
      '[clojure.contrib.lazy-seqs :only (primes)]
      '[clojure.contrib.combinatorics :only (selections)])
+
+(defrecord FactorPower [factor power])
 
 (defn fib [a b]
   (cons a (lazy-seq (fib b (+ b a)))))
@@ -29,6 +31,26 @@
   (filter palindrome?
           (map #(apply * %) (selections (range start end) 2))))
 
+(defn factor-powers-of [factors]
+  (map (fn [x] (let [[f p] x] (FactorPower. f p)))
+    (frequencies factors)))
+
+(defn least-common-multiple [nums]
+  (reduce *
+    (map (comp (fn [x] (expt (:factor x) (:power x))) first #(sort-by :power > %))
+         (vals (group-by :factor
+               (flatten (map (comp factor-powers-of prime-factors-of) nums)))))))
+
+(defn numbers-divisible-by
+  ([n] (take 10000 (numbers-divisible-by n n)))
+  ([n l] (cons l (lazy-seq (numbers-divisible-by n (+ l n))))))
+
+(defn sum-of-squares [nums]
+  (reduce + (map #(expt % 2) nums)))
+
+(defn square-of-sums [nums]
+  (expt (reduce + nums) 2))
+
 (defn problem-1 []
   (reduce +
     (set (union
@@ -47,18 +69,15 @@
 (defn problem-4 []
   (apply max (palindromes-between 100 1000)))
 
-(defn least-common-multiple [nums]
-  4)
-
-(defn numbers-divisible-by
-  ; ([n] (numbers-divisible-by n n))
-  ([n] (take 10000 (numbers-divisible-by n n)))
-  ([n l] (cons l (lazy-seq (numbers-divisible-by n (+ l n))))))
-
 (defn problem-5
-  ([] (problem-5 (range 1 11)))
+  ([] (problem-5 (range 1 21)))
   ([r] (apply min (reduce intersection
                   (map set (map numbers-divisible-by r))))))
+
+(defn problem-6
+  ([] (problem-6 (range 1 101)))
+  ([r] (- (square-of-sums r) (sum-of-squares r)))
+  )
 
 (defn -main
   [& args]
