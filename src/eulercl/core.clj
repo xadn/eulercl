@@ -76,8 +76,23 @@
 
 (defn problem-6
   ([] (problem-6 (range 1 101)))
-  ([r] (- (square-of-sums r) (sum-of-squares r)))
-  )
+  ([r] (- (square-of-sums r) (sum-of-squares r))))
+
+(defn sanitize-block-of-numbers [text]
+  (map (comp read-string str)
+       (clojure.string/replace text #"\s" "")))
+
+(defn slice-vec [my-vector len start]
+  (subvec my-vector start (+ start len)))
+
+(defn problem-7 [text numAdjacent]
+  (let [nums (vec (sanitize-block-of-numbers text))
+        endPos (- (count nums) numAdjacent)
+        sliceStarts (range 0 (+ 1 endPos))]
+    (apply max
+           (map (comp (partial reduce *)
+                      (partial slice-vec nums numAdjacent))
+                sliceStarts))))
 
 (defn -main
   [& args]
